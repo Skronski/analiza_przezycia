@@ -1,17 +1,19 @@
-
 # biblioteki --------------------------------------------------------------
 install.packages("OIsurv")
 install.packages('tidyverse')
 install.packages("survminer")
 install.packages('flexsurv')
+install.packages('egg')
+
+
 
 library(survminer)
 library(survival)
 library(tidyverse)
 library(readxl)
-library(ggplot)
+library(ggplot2)
 library(flexsurv)
-
+library(egg)
 
 
 
@@ -21,29 +23,81 @@ df <- read.csv('dane.csv', sep = ';', dec = ',')
 
 names(df) <- c('wiek', 'kobieta', 'nowotwor', 'zgon', 'dlugosc')
 
+# eksploracja danych  -----------------------------------------------------
+
+
+
+
+# wizualizacja danych -----------------------------------------------------
+
+par(mfrow = c(3, 1))
+
+p1 <- df %>% ggplot(aes(x = wiek)) + 
+  geom_histogram(binwidth = 5, color = "black", fill = "lightblue") +
+  ggtitle("Rozkład wieku") + 
+  xlab("Wiek") + 
+  ylab("Częstość")
+
+
+p2 <- df %>%
+  ggplot(aes(x = "", y = wiek)) +
+  geom_violin(fill = "lightblue", color = "black") +
+  ggtitle("rozkład wieku") +
+  ylab("Wiek") +
+  theme_minimal()
+p3 <- df %>%
+  ggplot(aes(x = "", y = wiek)) +
+  geom_boxplot(fill = "lightblue", color = "black", outlier.shape = NA) +
+  ggtitle("Rozkład wieku") +
+  ylab("wiek") +
+  theme_minimal()
+
+ggarrange(p1,p2,p3, nrow = 1)
+
 
 # model aft weibula -------------------------------------------------------
 
-hist(df$wiek)
 
-df$wiek_starszy <- ifelse(df$wiek >60, 1,0)
+weibull <-
+  survreg(
+    Surv(dlugosc, zgon) ~ nowotwor + kobieta + wiek_starszy,
+    data = df,
+    dist = 'weibull'
+  )
 
-weibull <- survreg(Surv(dlugosc, zgon) ~ nowotwor+kobieta +wiek_starszy,data = df, dist='weibull')
-
-summary(weibull)
+weibull %>% summary()
 
 
 # model lognormalny -------------------------------------------------------
 
-lognormal <- survreg(Surv(df$duration, df$failure) ~ as.factor(df$treatment), dist='lognormal')
-
-
+lognormal <-
+  survreg(
+    Surv(dlugosc, zgon) ~ nowotwor + kobieta + wiek_starszy,
+    data = df,
+    dist = 'lognormal'
+  )
+lognormal %>% summary()
 
 # model wykladniczy -------------------------------------------------------
 
+exponential <-
+  survreg(
+    Surv(dlugosc, zgon) ~ nowotwor + kobieta + wiek_starszy,
+    data = df,
+    dist = 'exponential'
+  )
 
-
+exponential %>% 
 
 # model logistyczny -------------------------------------------------------
 
+
+logistic <-
+  survreg(
+    Surv(dlugosc, zgon) ~ nowotwor + kobieta + wiek_starszy,
+    data = df,
+    dist = 'logistic'
+  )
+
+logistic %>% summary()
 
