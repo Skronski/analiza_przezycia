@@ -23,9 +23,11 @@ df <- read.csv('dane.csv', sep = ';', dec = ',')
 
 names(df) <- c('wiek', 'kobieta', 'nowotwor', 'zgon', 'dlugosc')
 
+
+
 # eksploracja danych  -----------------------------------------------------
 
-
+sum(is.na(df$wiek))
 
 
 # wizualizacja danych -----------------------------------------------------
@@ -54,6 +56,16 @@ p3 <- df %>%
 
 ggarrange(p1,p2,p3, nrow = 1)
 
+df %>% ggplot(aes(x = wiek, fill = kobieta)) +
+  geom_histogram(binwidth = 5, alpha = 0.7, position = "identity") +
+  ggtitle("Rozkład wieku ze względu na płeć") +
+  xlab("Wiek") +
+  ylab("Częstość") +
+  facet_wrap(~ kobieta, nrow = 1) +
+  theme_minimal()+
+  theme(legend.position='none')
+
+ as.factor(df$kobieta,labels = c('Kobieta', 'Mężczyzna'))
 
 # model aft weibula -------------------------------------------------------
 
